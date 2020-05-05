@@ -4,12 +4,14 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR ARM)
 
 set(TOOLCHAIN arm-none-eabi)
-if(NOT DEFINED TOOLCHAIN_PATH)
-    message(FATAL_ERROR "Please specify the TOOLCHAIN_PATH!\nFor example: -DTOOLCHAIN_PATH=\"C:/Users/You/Desktop/gcc-arm-none-eabi-7-2018-q2-update/\"")
+if(NOT DEFINED ENV{TOOLCHAIN_PATH})
+    message(FATAL_ERROR "Please specify the TOOLCHAIN_PATH environment variable!\nFor example: export TOOLCHAIN_PATH=\"C:/Users/You/Desktop/gcc-arm-none-eabi-7-2018-q2-update/\"")
+else()
+    message(STATUS "Received TOOLCHAIN_PATH: $ENV{TOOLCHAIN_PATH}")
 endif()
-set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PATH}/bin)
-set(TOOLCHAIN_INC_DIR ${TOOLCHAIN_PATH}/${TOOLCHAIN}/include)
-set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PATH}/${TOOLCHAIN}/lib)
+set(TOOLCHAIN_BIN_DIR $ENV{TOOLCHAIN_PATH}/bin)
+set(TOOLCHAIN_INC_DIR $ENV{TOOLCHAIN_PATH}/${TOOLCHAIN}/include)
+set(TOOLCHAIN_LIB_DIR $ENV{TOOLCHAIN_PATH}/${TOOLCHAIN}/lib)
 
 if(WIN32)
     set(TOOLCHAIN_EXT ".exe")
@@ -52,17 +54,15 @@ set(CMAKE_ASM_FLAGS "-mthumb --specs=nano.specs -x assembler-with-cpp" CACHE INT
 # Linker flags:
 # -Wl,--gc-sections: Perform dead code elimination
 # -static: Do not link against shared libraries
-# --specs=nano.specs: Reduced runtime libraries
-# -mthumb: Use the thumb instruction set
 # -Wl,-Map=${CMAKE_PROJECT_NAME}.map: Print link map to file ${CMAKE_PROJECT_NAME}.map
 # -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group: Link against libc.so, libm.so, libstdc++.so, libsupc++.so
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -static --specs=nano.specs -mthumb -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group" CACHE INTERNAL "Linker options")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -static -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group" CACHE INTERNAL "Linker options")
 
 # DEBUG build flags:
-# -g: Enable debug symbols
-set(CMAKE_C_FLAGS_DEBUG "-g" CACHE INTERNAL "C Compiler options for debug build type")
-set(CMAKE_CXX_FLAGS_DEBUG "-g" CACHE INTERNAL "C++ Compiler options for debug build type")
-set(CMAKE_ASM_FLAGS_DEBUG "-g" CACHE INTERNAL "ASM Compiler options for debug build type")
+# -g3: Enable all debug symbols
+set(CMAKE_C_FLAGS_DEBUG "-g3" CACHE INTERNAL "C Compiler options for debug build type")
+set(CMAKE_CXX_FLAGS_DEBUG "-g3" CACHE INTERNAL "C++ Compiler options for debug build type")
+set(CMAKE_ASM_FLAGS_DEBUG "-g3" CACHE INTERNAL "ASM Compiler options for debug build type")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "" CACHE INTERNAL "Linker options for debug build type")
 
 # RELEASE build flags:
@@ -76,7 +76,7 @@ set(CMAKE_C_COMPILER ${TOOLCHAIN_BIN_DIR}/${TOOLCHAIN}-gcc${TOOLCHAIN_EXT} CACHE
 set(CMAKE_CXX_COMPILER ${TOOLCHAIN_BIN_DIR}/${TOOLCHAIN}-g++${TOOLCHAIN_EXT} CACHE INTERNAL "C++ Compiler")
 set(CMAKE_ASM_COMPILER ${TOOLCHAIN_BIN_DIR}/${TOOLCHAIN}-gcc${TOOLCHAIN_EXT} CACHE INTERNAL "ASM Compiler")
 
-set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_PATH}/${${TOOLCHAIN}})
+set(CMAKE_FIND_ROOT_PATH $ENV{TOOLCHAIN_PATH}/${${TOOLCHAIN}})
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
